@@ -12,64 +12,65 @@ import java.util.Arrays;
 
 public class FileProcessor {
 
-        private static BufferedReader readCSVFile(String filePath) throws IOException {
-            FileReader fileReader = new FileReader(filePath);
-            return new BufferedReader(fileReader);
-        }
+    private static BufferedReader readCSVFile(String filePath) throws IOException {
+        FileReader fileReader = new FileReader(filePath);
+        return new BufferedReader(fileReader);
+    }
 
-        public static void addAuthorizedDeliveryField(String loginsFilePath, String postingsFilePath, String outputFilePath) throws IOException {
-            BufferedReader loginsReader = readCSVFile(loginsFilePath);
+    public static void addAuthorizedDeliveryField(String loginsFilePath, String postingsFilePath, String outputFilePath) throws IOException {
+        BufferedReader loginsReader = readCSVFile(loginsFilePath);
 
-            BufferedReader postingsReader = readCSVFile(postingsFilePath);
+        BufferedReader postingsReader = readCSVFile(postingsFilePath);
 
-            FileWriter fileWriter = new FileWriter(outputFilePath);
+        FileWriter fileWriter = new FileWriter(outputFilePath);
 
-            String loginsLine;
-            while ((loginsLine = loginsReader.readLine()) != null) {
-                String[] loginsFields = loginsLine.split(",");
+        String loginsLine;
+        while ((loginsLine = loginsReader.readLine()) != null) {
+            String[] loginsFields = loginsLine.split(",");
 
-                String postingsLine;
-                while ((postingsLine = postingsReader.readLine()) != null) {
-                    String[] postingsFields = postingsLine.split(",");
-                    if (loginsFields[0].equals(postingsFields[0]) && loginsFields[2].equals("true")) {
+            String postingsLine;
+            while ((postingsLine = postingsReader.readLine()) != null) {
+                String[] postingsFields = postingsLine.split(",");
+                if (loginsFields[0].equals(postingsFields[0]) && loginsFields[2].equals("true")) {
 
-                        fileWriter.append(postingsLine).append(",true\n");
-                    } else {
+                    fileWriter.append(postingsLine).append(",true\n");
+                } else {
 
-                        fileWriter.append(postingsLine).append(",false\n");
-                    }
+                    fileWriter.append(postingsLine).append(",false\n");
                 }
             }
-
-            loginsReader.close();
-            postingsReader.close();
-            fileWriter.close();
         }
 
-        public static void saveToPostgresSQL(String filePath) throws IOException, SQLException {
+        loginsReader.close();
+        postingsReader.close();
+        fileWriter.close();
+    }
 
-            Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/A1Tests", "postgres", "postgres");
+    public static void saveToPostgresSQL(String filePath) throws IOException, SQLException {
 
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO logins (application, appaccountname, isactive, jobtitle, department ) VALUES (?, ?, ?, ?, ?)");
+        Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/A1Tests", "postgres", "postgres");
 
-            BufferedReader reader = readCSVFile(filePath);
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] fields = line.split(",");
-                System.out.println(Arrays.toString(fields));
-                preparedStatement.setString(1, fields[0]);
-                preparedStatement.setString(2, fields[1]);
-                preparedStatement.setString(3, fields[2]);
-                preparedStatement.setString(4, fields[3]);
-                preparedStatement.setString(5, fields[4]);
+        PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO logins (application, appaccountname, isactive, jobtitle, department ) VALUES (?, ?, ?, ?, ?)");
 
-                preparedStatement.executeUpdate();
-            }
+        BufferedReader reader = readCSVFile(filePath);
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] fields = line.split(",");
+            System.out.println(Arrays.toString(fields));
+            preparedStatement.setString(1, fields[0]);
+            preparedStatement.setString(2, fields[1]);
+            preparedStatement.setString(3, fields[2]);
+            preparedStatement.setString(4, fields[3]);
+            preparedStatement.setString(5, fields[4]);
 
-            reader.close();
-            preparedStatement.close();
-            connection.close();
+            preparedStatement.executeUpdate();
         }
+
+        reader.close();
+        preparedStatement.close();
+        connection.close();
+    }
+
     public static void saveToPostgresSQLPosting(String PostingPath) throws IOException, SQLException {
         Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/A1Tests", "postgres", "postgres");
 
@@ -102,28 +103,28 @@ public class FileProcessor {
         connection.close();
     }
 
-        public static void main(String[] args) {
-            try {
+    public static void main(String[] args) {
+        try {
 
-                String loginsFilePath = "C:\\Users\\NT\\OneDrive\\Desktop\\кулинар\\testovoeA1\\src\\main\\resources\\logins.csv";
-                BufferedReader loginsReader = readCSVFile(loginsFilePath);
+            String loginsFilePath = "C:\\Users\\NT\\OneDrive\\Desktop\\кулинар\\testovoeA1\\src\\main\\resources\\logins.csv";
+            BufferedReader loginsReader = readCSVFile(loginsFilePath);
 
-                String postingsFilePath = "C:\\Users\\NT\\OneDrive\\Desktop\\кулинар\\testovoeA1\\src\\main\\resources\\postings.csv";
-                BufferedReader postingsReader = readCSVFile(postingsFilePath);
+            String postingsFilePath = "C:\\Users\\NT\\OneDrive\\Desktop\\кулинар\\testovoeA1\\src\\main\\resources\\postings.csv";
+            BufferedReader postingsReader = readCSVFile(postingsFilePath);
 
-                String outputFilePath = "C:\\Users\\NT\\OneDrive\\Desktop\\кулинар\\testovoeA1\\src\\main\\resources\\output.csv";
-                addAuthorizedDeliveryField(loginsFilePath, postingsFilePath, outputFilePath);
+            String outputFilePath = "C:\\Users\\NT\\OneDrive\\Desktop\\кулинар\\testovoeA1\\src\\main\\resources\\output.csv";
+            addAuthorizedDeliveryField(loginsFilePath, postingsFilePath, outputFilePath);
 
-                saveToPostgresSQL(loginsFilePath);
+            saveToPostgresSQL(loginsFilePath);
 
-                saveToPostgresSQLPosting(postingsFilePath);
+            saveToPostgresSQLPosting(postingsFilePath);
 
-                System.out.println("Data processing and saving completed successfully.");
-            } catch (IOException e) {
-                System.err.println("An error occurred while reading or writing the files: " + e.getMessage());
-            } catch (SQLException e) {
-                System.err.println("An error occurred while connecting to the database or executing the SQL statement: " + e.getMessage());
-            }
+            System.out.println("Data processing and saving completed successfully.");
+        } catch (IOException e) {
+            System.err.println("An error occurred while reading or writing the files: " + e.getMessage());
+        } catch (SQLException e) {
+            System.err.println("An error occurred while connecting to the database or executing the SQL statement: " + e.getMessage());
         }
-
     }
+
+}

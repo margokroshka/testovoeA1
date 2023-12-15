@@ -31,8 +31,6 @@ public class PostingsDatabase {
         String content = resultSet.getString("content");
         boolean authorized = resultSet.getBoolean("authorized");
         String date = resultSet.getString("docdate");
-
-        // Create a new Posting object and add it to the list
         Posting posting = new Posting(id, title, content, authorized, date);
         postings.add(posting);
         }
